@@ -39,8 +39,8 @@ docker-compose up -d --force-recreate trino
 
 ### Подключение к Minio
 Параметры подключения стандартные:
-* login: minioadmin
-* password: minioadmin
+* `login`: `minioadmin`
+* `password`: `minioadmin`
 
 ### Подключение к Trino
 Проверка работоспобности Trino:
