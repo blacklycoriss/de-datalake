@@ -1,5 +1,5 @@
 # Простой DataLake: Trino + S3 Minio + Spark + Iceberg
-[Исходное видео](https://www.youtube.com/watch?v=-fAwvsbSZh0 "Туториал по Data Lake")
+[Исходное видео](https://www.youtube.com/watch?v=-fAwvsbSZh0 "Туториал по Data Lake") \
 [Оригинальный репозиторий](https://github.com/k0rsakov/pet_project_trino_data_lake)
 
 
