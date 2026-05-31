@@ -91,3 +91,22 @@ def minio_remove_bucket(conn_params: dict, bucket_name: str) -> None:
         print(f"🦩 With Minio client; Bucket '{bucket_name}' removed from {conn_params['target']}!")
     else:
         print(f"🦩 With Minio client; Bucket '{bucket_name}' does not exist in {conn_params['target']}.")
+
+def minio_upload_csv(conn_params: dict, bucket_name: str, object_name: str, file_path: str) -> None:
+    """
+    Ручка для загрузки файла в бакет.
+
+    :param conn_params: Параметры подключения.
+    :param bucket_name: Имя бакета.
+    :param object_name: Имя файла в бакете.
+    :param file_path: Имя файла на диске.
+    :return: Ничего.
+    """
+    client = minio_client(conn_params)
+    result = client.fput_object(
+        bucket_name=bucket_name,
+        object_name=object_name,
+        file_path=file_path,
+    )
+    print(f"🦩 With Minio client; Uploaded {object_name} "
+          f"to {bucket_name} in {conn_params['target']} (etag: {result.etag})")
