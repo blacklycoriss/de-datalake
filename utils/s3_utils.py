@@ -110,3 +110,16 @@ def minio_upload_csv(conn_params: dict, bucket_name: str, object_name: str, file
     )
     print(f"🦩 With Minio client; Uploaded {object_name} "
           f"to {bucket_name} in {conn_params['target']} (etag: {result.etag})")
+
+def minio_list_objects(conn_params: dict, bucket_name: str) -> None:
+    """
+    Ручка для просмотра содержимого бакета.
+
+    :param conn_params: Параметры подключения.
+    :param bucket_name: Имя бакета.
+    :return: Ничего.
+    """
+    client = minio_client(conn_params)
+    print(f"🦩 With Minio client; Objects in bucket '{bucket_name}' in {conn_params['target']}:")
+    for obj in client.list_objects(bucket_name):
+        print(obj.object_name, obj.size, obj.last_modified)
