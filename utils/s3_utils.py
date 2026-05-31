@@ -1,3 +1,5 @@
+from minio import Minio
+
 from creds import (
     s3_minio_access_key,
     s3_minio_bucket_name,
@@ -16,3 +18,17 @@ S3_CONFIGS = {
         "region": None,
     },
 }
+
+def minio_client(conn_params: dict) -> Minio:
+    """
+    Создает экземпляр Minio.
+
+    :param conn_params: Параметры подключения.
+    :return: Клиент Minio.
+    """
+    return Minio(
+        endpoint=conn_params["endpoint"],
+        access_key=conn_params["access_key"],
+        secret_key=conn_params["secret_key"],
+        secure=conn_params.get("secure", True),
+    )
