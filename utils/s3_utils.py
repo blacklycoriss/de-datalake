@@ -1,4 +1,5 @@
 from minio import Minio
+from minio.error import InvalidResponseError, S3Error
 
 from creds import (
     s3_minio_access_key,
@@ -45,3 +46,26 @@ def minio_list_buckets(conn_params: dict) -> None:
     print(f"🦩 With Minio client; Buckets (minio) in {conn_params['target']}:")
     for bucket in buckets:
         print(bucket.name, bucket.creation_date)
+
+def minio_create_bucket(conn_params: dict, bucket_name: str) -> None:
+    """
+    Ручка для создания бакета.
+
+    :param conn_params: Параметры подключения.
+    :param bucket_name: Имя бакета.
+    :return: Ничего.
+    """
+    client = minio_client(conn_params)
+    try:
+        client.make_bucket(bucket_name)
+        print(f"🦩 With Minio client; Bucket '{bucket_name}' created in {conn_params['target']}!")
+    except (S3Error, InvalidResponseError) as exc:
+        msg = str(exc)
+        if (
+            (hasattr(exc, "code") and getattr(exc, "code", None) in ("BucketAlreadyOwnedByYou", "BucketAlreadyExists"))
+            or "BucketAlreadyOwnedByYou" in msg
+            or "BucketAlreadyExists" in msg
+        ):
+            print(f"🦩 With Minio client; Bucket '{bucket_name}' already exists in {conn_params['target']}.")
+        else:
+            print(f"🦩 With Minio client; Error creating bucket '{bucket_name}' in {conn_params['target']}: {exc}")
