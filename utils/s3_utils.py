@@ -32,3 +32,16 @@ def minio_client(conn_params: dict) -> Minio:
         secret_key=conn_params["secret_key"],
         secure=conn_params.get("secure", True),
     )
+
+def minio_list_buckets(conn_params: dict) -> None:
+    """
+    Отображает список бакетов.
+
+    :param conn_params: Параметры подключения.
+    :return: Ничего.
+    """
+    client = minio_client(conn_params)
+    buckets = client.list_buckets()
+    print(f"🦩 With Minio client; Buckets (minio) in {conn_params['target']}:")
+    for bucket in buckets:
+        print(bucket.name, bucket.creation_date)
