@@ -224,3 +224,4 @@ cred.py
 titanic.csv
 postgres-oltp-data
 clickhouse-data
+greenplum-data

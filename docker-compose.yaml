@@ -145,3 +145,26 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  greenplum:
+    image: datagrip/greenplum:6.8
+    container_name: greenplum
+    environment:
+      GP_USER: gpadmin
+      GP_PASSWORD: gpadmin
+      GP_DB: gpdb
+    # entrypoint: | #Не трогать: переопределяет entrypoint внутри контейнера, чтобы можно было использовать env из docker-compose
+    #   /bin/bash -c "
+    #   until PGPASSWORD=pivotal psql -h greenplum -p 5432 -U tester -d testdb -c 'CREATE USER gpadmin WITH PASSWORD '\\''gpadmin'\\'' SUPERUSER;'; do sleep 1; done;
+    #   PGPASSWORD=pivotal psql -h greenplum -p 5432 -U tester -d testdb -c 'CREATE DATABASE gpdb WITH OWNER gpadmin;';
+    #   exit 0;
+    #   "
+    ports:
+      - "5435:5432"
+    volumes:
+      - ./greenplum-data:/var/lib/gpdb/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gpadmin -d gpdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
