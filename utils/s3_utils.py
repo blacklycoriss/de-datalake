@@ -38,7 +38,7 @@ def boto3_create_bucket(conn_params: dict, bucket_name: str) -> None:
 
     try:
         params = {"Bucket": bucket_name}
-        if conn_params.get("region") and conn_params.get("region") != "us-east-1":
+        if conn_params.get("region") != "us-east-1":
             params["CreateBucketConfiguration"] = {"LocationConstraint": conn_params["region"]}
         s3.create_bucket(**params)
         print(f"🪣 With Boto3 client; Bucket '{bucket_name}' created! in {conn_params['target']}")
