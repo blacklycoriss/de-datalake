@@ -19,7 +19,8 @@ services:
     
   minio-setup:
     depends_on:
-      [minio]
+      minio:
+        condition: service_healthy
     image: minio/mc:RELEASE.2025-02-15T10-36-16Z
     environment:
       - MINIO_ROOT_USER=minioadmin
@@ -48,7 +49,7 @@ services:
       timeout: 5s
       retries: 5
 
-  iceberg-rest:
+  rest:
     image: tabulario/iceberg-rest:1.6.0
     ports:
       - "8181:8181"
@@ -68,9 +69,14 @@ services:
       postgres-iceberg:
         condition: service_healthy
       minio:
-        condition: service_started
+        condition: service_healthy
       minio-setup:
-        condition: service_started
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: on-failure
 
   trino:
@@ -84,7 +90,7 @@ services:
       - MINIO_ROOT_USER=minioadmin
       - MINIO_ROOT_PASSWORD=minioadmin
     depends_on:
-      - iceberg-rest
+      - rest
 
   postgres-oltp:
     image: postgres:13
