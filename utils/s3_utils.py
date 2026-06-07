@@ -16,22 +16,25 @@ S3_CONFIGS = {
         "access_key": AWS_ACCESS_KEY_ID,
         "secret_key": AWS_SECRET_ACCESS_KEY,
         "bucket": None,
-        "secure": False,  # локально часто http
+        "secure": False,
         "region": AWS_DEFAULT_REGION,
     },
 }
 
-def boto3_create_bucket(conn_params: dict, bucket_name: str) -> None:
-
-    s3 = boto3.client(
+def get_s3_client(conn_params: dict):
+    return boto3.client(
         's3',
         endpoint_url=conn_params['endpoint'],
         aws_access_key_id=conn_params['access_key'],
         aws_secret_access_key=conn_params['secret_key'],
-        region_name=conn_params.get('region') or 'us-east-1',
-        use_ssl=conn_params.get('secure', False),
+        region_name=conn_params.get('region', 'us-east-1'),
+        use_ssl=conn_params.get('secure', True),
         config=Config(signature_version='s3v4')
     )
+
+def boto3_create_bucket(conn_params: dict, bucket_name: str) -> None:
+
+    s3 = get_s3_client(conn_params)
 
     try:
         params = {"Bucket": bucket_name}
@@ -47,15 +50,7 @@ def boto3_create_bucket(conn_params: dict, bucket_name: str) -> None:
 
 def boto3_remove_bucket(conn_params: dict, bucket_name: str) -> None:
 
-    s3 = boto3.client(
-        's3',
-        endpoint_url=conn_params['endpoint'],
-        aws_access_key_id=conn_params['access_key'],
-        aws_secret_access_key=conn_params['secret_key'],
-        region_name=conn_params.get('region') or 'us-east-1',
-        use_ssl=conn_params.get('secure', False),
-        config=Config(signature_version='s3v4')
-    )
+    s3 = get_s3_client(conn_params)
     
     resp = s3.list_objects_v2(Bucket=bucket_name)
 
@@ -71,15 +66,8 @@ def boto3_remove_bucket(conn_params: dict, bucket_name: str) -> None:
 
 
 def boto3_upload_csv(conn_params: dict, bucket_name: str, object_name: str, file_path: str) -> None:
-    s3 = boto3.client(
-        's3',
-        endpoint_url=conn_params['endpoint'],
-        aws_access_key_id=conn_params['access_key'],
-        aws_secret_access_key=conn_params['secret_key'],
-        region_name=conn_params.get('region') or 'us-east-1',
-        use_ssl=conn_params.get('secure', False),
-        config=Config(signature_version='s3v4')
-    )
+    
+    s3 = get_s3_client(conn_params)
 
     s3.upload_file(file_path, bucket_name, object_name)
     print(f"🪣 With Boto3 client; Uploaded {object_name} to {bucket_name} in {conn_params['target']}")
@@ -87,18 +75,11 @@ def boto3_upload_csv(conn_params: dict, bucket_name: str, object_name: str, file
 
 def boto3_list_objects(conn_params: dict, bucket_name: str) -> None:
 
-    s3 = boto3.client(
-            's3',
-            endpoint_url=conn_params['endpoint'],
-            aws_access_key_id=conn_params['access_key'],
-            aws_secret_access_key=conn_params['secret_key'],
-            region_name=conn_params.get('region') or 'us-east-1',
-            use_ssl=conn_params.get('secure', False),
-            config=Config(signature_version='s3v4')
-        )
+    s3 = get_s3_client(conn_params)
     
-    resp = s3.list_objects_v2(Bucket=bucket_name)
     print(f"🪣 With Boto3 client; Objects in bucket '{bucket_name}' in {conn_params['target']}:")
 
-    for obj in resp.get("Contents", []):
-        print(obj["Key"], obj["Size"], obj["LastModified"])
+    paginator = s3.get_paginator('list_objects_v2')
+    for page in paginator.paginate(Bucket=bucket_name):
+        for obj in page.get("Contents", []):
+            print(obj["Key"], obj["Size"], obj["LastModified"])
