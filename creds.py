@@ -1,4 +1,4 @@
-s3_minio_bucket_name=""
-s3_minio_endpoint="localhost:9000"
-s3_minio_access_key=""
-s3_minio_secret_key=""
+AWS_ACCESS_KEY_ID='minioadmin'
+AWS_SECRET_ACCESS_KEY='minioadmin'
+AWS_DEFAULT_REGION='us-east-1'
+ENDPOINT_URL='http://localhost:9000'
