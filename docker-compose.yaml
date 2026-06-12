@@ -168,3 +168,28 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  kafka:
+    image: ubuntu/kafka:3.6-22.04_edge
+    container_name: kafka
+    environment:
+      # KRaft-режим
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      # Автосоздание топиков при первом обращении (удобно для dev)
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_CFG_DELETE_TOPIC_ENABLE=true
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    ports:
+      - "9092:9092"   # для внешних клиентов (Spark, Python) с хоста
+    volumes:
+      - ./kafka-data:/ubuntu/kafka
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
