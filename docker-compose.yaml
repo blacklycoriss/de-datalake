@@ -209,6 +209,7 @@ services:
       echo '>>> Kafka test topic created (or already exists)';
       exit 0;
       "
+      
   x-airflow-common: &airflow-common
     image: apache/airflow:2.9.3   # официальный образ, без кастомного Dockerfile
     environment: &airflow-common-env
