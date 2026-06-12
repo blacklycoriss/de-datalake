@@ -197,3 +197,15 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  kafka-init:
+    image: apache/kafka:4.3.0   # тот же образ, что и у брокера
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: >
+      /bin/bash -c "
+      /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic test_topic --partitions 1 --replication-factor 1;
+      echo '>>> Kafka test topic created (or already exists)';
+      exit 0;
+      "
