@@ -17,6 +17,8 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+    networks:
+    - datalake-network
 
   minio-setup:
     depends_on:
@@ -35,6 +37,8 @@ services:
       /usr/bin/mc policy set public minio/datalake;
       exit 0;
       "
+    networks:
+    - datalake-network
 
   postgres-iceberg:
     image: postgres:13
@@ -49,6 +53,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+    - datalake-network
 
   rest:
     image: tabulario/iceberg-rest:1.6.0
@@ -79,6 +85,8 @@ services:
       timeout: 5s
       retries: 5
     restart: on-failure
+    networks:
+      - datalake-network
 
   trino:
     image: trinodb/trino:476
@@ -92,51 +100,50 @@ services:
       - MINIO_ROOT_PASSWORD=minioadmin
     depends_on:
       - rest
+    networks:
+      - datalake-network
 
   # --- Spark Standalone кластер ---
   spark-master:
-    image: tabulario/spark-iceberg:3.5.5_1.8.1
+    image: bitnamilegacy/spark:3.5.1
     container_name: spark-master
     hostname: spark-master
     environment:
+      - SPARK_MODE=master
       - SPARK_MASTER_HOST=spark-master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_MASTER_PORT=7077
+      - SPARK_MASTER_WEBUI_PORT=8080
       - AWS_ACCESS_KEY_ID=minioadmin
       - AWS_SECRET_ACCESS_KEY=minioadmin
       - AWS_REGION=us-east-1
     ports:
-      - "8088:8080"   # Spark Master Web UI (на хост-машине порт 8088)
-      - "7077:7077"   # Spark Master RPC
-      - "8888:8888"   # Jupyter (опционально)
-    command: >
-      sh -c "
-        /opt/spark/sbin/start-master.sh -h spark-master &&
-        tail -f /opt/spark/logs/*.out
-      "
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - "8088:8080"
+      - "7077:7077"
+    networks:
+      - datalake-network
 
   spark-worker:
-    image: tabulario/spark-iceberg:3.5.5_1.8.1
+    image: bitnamilegacy/spark:3.5.1
     container_name: spark-worker
     hostname: spark-worker
     environment:
+      - SPARK_MODE=worker
       - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_WEBUI_PORT=8081
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2g
       - AWS_ACCESS_KEY_ID=minioadmin
       - AWS_SECRET_ACCESS_KEY=minioadmin
       - AWS_REGION=us-east-1
     ports:
-      - "8081:8081"   # Web UI воркера
-    command: >
-      sh -c "
-        /opt/spark/sbin/start-worker.sh spark://spark-master:7077 &&
-        tail -f /opt/spark/logs/*.out
-      "
+      - "8081:8081"
     depends_on:
-      spark-master:
-        condition: service_healthy
+      - spark-master
+    networks:
+      - datalake-network
 
   # --- Остальные сервисы (OLTP, ClickHouse, Greenplum, Kafka) ---
   postgres-oltp:
@@ -155,6 +162,8 @@ services:
       retries: 5
     volumes:
       - ./postgres-oltp-data:/var/lib/postgresql/data
+    networks:
+      - datalake-network
 
   clickhouse:
     image: clickhouse/clickhouse-server
@@ -177,6 +186,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - datalake-network
 
   greenplum:
     image: datagrip/greenplum:6.8
@@ -194,6 +205,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - datalake-network
 
   kafka:
     image: apache/kafka:4.3.0
@@ -220,6 +233,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - datalake-network
 
   kafka-init:
     image: apache/kafka:4.3.0
@@ -232,6 +247,8 @@ services:
       echo '>>> Kafka test topic created (or already exists)';
       exit 0;
       "
+    networks:
+      - datalake-network
 
   # --- Airflow ---
   x-airflow-common: &airflow-common
@@ -248,14 +265,16 @@ services:
       AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
       AIRFLOW__CORE__TEST_CONNECTION: 'Enabled'
       AIRFLOW_CONN_TRINO_DEFAULT: "trino://trino:8080?http_scheme=http"
-      # Автоматически создаст Spark Connection с ID=spark_default
-      AIRFLOW_CONN_SPARK_DEFAULT: "spark://spark-master:7077?deploy_mode=client&spark_home=/opt/spark"
+      # Исправленное подключение к Spark (JSON-формат)
+      AIRFLOW_CONN_SPARK_DEFAULT: 'spark://spark-master:7077?deploy_mode=client'
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
       - ./airflow/config:/opt/airflow/config
       - ./airflow/plugins:/opt/airflow/plugins
       - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - datalake-network
 
   airflow-postgres:
     image: postgres:13
@@ -274,6 +293,8 @@ services:
       retries: 5
       start_period: 5s
     restart: always
+    networks:
+      - datalake-network
 
   airflow-init:
     <<: *airflow-common
@@ -288,6 +309,8 @@ services:
         airflow db init
         airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin
     restart: on-failure
+    networks:
+      - datalake-network
 
   airflow-webserver:
     <<: *airflow-common
@@ -307,6 +330,8 @@ services:
         condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
+    networks:
+      - datalake-network
 
   airflow-scheduler:
     <<: *airflow-common
@@ -324,8 +349,9 @@ services:
         condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
-      spark-master:
-        condition: service_healthy   # дождёмся готовности Spark
+    networks:
+      - datalake-network
+
 
   airflow-triggerer:
     <<: *airflow-common
@@ -343,6 +369,13 @@ services:
         condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
+    networks:
+      - datalake-network
 
 volumes:
   postgres_airflow_data:
+
+networks:
+  datalake-network:
+    name: datalake-network
+    driver: bridge
