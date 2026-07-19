@@ -123,7 +123,7 @@ https://dbeaver.io/download/
 
 # Описание проекта
 
-## Архитектура папок
+## Архитектура каталогов
 
 В полной имплементации проекта существуют следующие папки:
 
@@ -138,10 +138,18 @@ https://dbeaver.io/download/
 
 
 ### 2. Каталоги с данными сервисов
-
 #### Данные каталоги находятся в .gitignore, поэтому отсутствуют в репозитории, создаются при разворачивании контейнеров.
-##### 2.1. clickhouse-data - Данные Clickhouse
-##### 2.2. data - Данные S3
-##### 2.3. greenplum-data - Данные Greenplum
-##### 2.4. kafka-data - Данные Kafka
-##### 2.5. postgres-oltp-data - Данные PostgreSQL (OLTP)
+##### 2.1. clickhouse-data - данные Clickhouse
+##### 2.2. data - данные S3
+##### 2.3. greenplum-data - данные Greenplum
+##### 2.4. kafka-data - данные Apache Kafka
+##### 2.5. postgres-oltp-data - данные PostgreSQL (OLTP)
+
+
+### 3. Каталоги Trino (trino/etc)
+#### 3.1. catalog - данные о подключениях к сервисам
+##### 3.1.1. clickhouse.properties - подключение к Clickhouse
+##### 3.1.2. greenplum.properties - подключение к Greenplum
+##### 3.1.3. iceberg.properties - подключение к Apache Iceberg
+##### 3.1.4. kafka.properties - подключение к Apache Kafka
+##### 3.1.5. oltp.properties - подключение к PostgreSQL (OLTP)
