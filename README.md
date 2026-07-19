@@ -153,3 +153,6 @@ https://dbeaver.io/download/
 ##### 3.1.3. iceberg.properties - подключение к Apache Iceberg
 ##### 3.1.4. kafka.properties - подключение к Apache Kafka
 ##### 3.1.5. oltp.properties - подключение к PostgreSQL (OLTP)
+#### 3.2. config.properties - конфиг файл сервера Trino
+#### 3.3. jvm.config - настройка JVM, в которой работает Trino
+#### 3.4. node.properties - настройки для текущего узла в кластере (здесь кластера нет, но файл все равно нужен)
