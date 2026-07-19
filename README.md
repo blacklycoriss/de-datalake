@@ -1,5 +1,15 @@
-# de-datalake
-S3 + Iceberg + Trino + PySpark + PostgreSQL + Greenplum + Clickhouse + Kafka
+Инструменты:
+#### 1. S3
+#### 2. Apache Iceberg
+#### 3. Trino
+#### 4. Apache Spark (PySpark)
+#### 5. PostgreSQL
+#### 6. Greenplum
+#### 7. Clickhouse
+#### 8. Apache Kafka
+
+# НАСТРОЙКИ ПРОЕКТА ПЕРЕД РАБОТОЙ
+
 
 ## ШАГИ ПО РАЗВЕРТЫВАНИЮ ОКРУЖЕНИЯ
 
@@ -107,6 +117,6 @@ https://dbeaver.io/download/
 
 Чтобы подключиться к DWH, необходимо создать несколько подключений в Dbeaver'е:
 
-1. Подключение к Airflow БД
-2. Подключение к OLTP БД
-3. Подключение к Clickhouse БД
+#### 1. Подключение к Airflow БД
+#### 2. Подключение к OLTP БД
+#### 3. Подключение к Clickhouse БД
