@@ -127,7 +127,7 @@ https://dbeaver.io/download/
 
 В полной имплементации проекта существуют следующие папки:
 
-### 1. airflow - директория с DAG'ами Apache Airflow
+### 1. airflow - директория Apache Airflow
 #### 1.1. config - пользовательские конфиг файлы
 #### 1.2. dags - DAG'и для исполнения
 #### 1.3. logs - хранение логов выполнения задач (Task Instances) и логов самого веб-сервера/воркеров
@@ -135,3 +135,13 @@ https://dbeaver.io/download/
 ##### 1.3.2. logs/webserver/ — логи веб-интерфейса
 ##### 1.3.3. logs/dag_id={dag_id}/task_id={task_id}/{execution_date}.log — конкретные логи выполнения каждого таска
 #### 1.4. plugins - кастомные расширения, которые не входят в базовый дистрибутив Airflow
+
+
+### 2. Каталоги с данными сервисов
+
+#### Данные каталоги находятся в .gitignore, поэтому отсутствуют в репозитории, создаются при разворачивании контейнеров.
+##### 2.1. clickhouse-data - Данные Clickhouse
+##### 2.2. data - Данные S3
+##### 2.3. greenplum-data - Данные Greenplum
+##### 2.4. kafka-data - Данные Kafka
+##### 2.5. postgres-oltp-data - Данные PostgreSQL (OLTP)
