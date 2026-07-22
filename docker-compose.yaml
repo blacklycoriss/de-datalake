@@ -325,6 +325,8 @@ services:
       retries: 5
       start_period: 30s
     restart: always
+    volumes:
+    - ./dags:/opt/airflow/dags
     depends_on:
       airflow-postgres:
         condition: service_healthy
@@ -344,6 +346,11 @@ services:
       retries: 5
       start_period: 30s
     restart: always
+    volumes:
+      - ./dags:/opt/airflow/dags  # <- обязательно!
+      - ./logs:/opt/airflow/logs
+    environment:
+      - AIRFLOW__CORE__DAGS_FOLDER=/opt/airflow/dags
     depends_on:
       airflow-postgres:
         condition: service_healthy
